@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bonito Cafe | Fresh &amp; Tasty</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f7f7f2; color: #242820; font: 16px Arial, sans-serif; }
+        header { padding: 28px 20px; background: #194d36; color: white; text-align: center; }
+        header h1 { margin: 0 0 8px; }
+        header p { margin: 0; color: #d7eadb; }
+        main { width: min(920px, 92%); margin: 28px auto; }
+        #table { color: #39714e; }
+        h2 { margin-top: 28px; }
+        .layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 22px; align-items: start; }
+        .menu { display: grid; gap: 12px; }
+        .item, .checkout { padding: 18px; background: white; border: 1px solid #e6e8df; border-radius: 12px; }
+        .item { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .item h3, .item p { margin: 0 0 6px; }
+        .item p { color: #74796f; font-size: 14px; }
+        .price { color: #194d36; font-weight: bold; }
+        button { padding: 10px 15px; border: 0; border-radius: 7px; background: #27764b; color: white; font-weight: bold; cursor: pointer; }
+        button:hover { background: #194d36; }
+        button:focus-visible, input:focus-visible { outline: 3px solid #e4a834; outline-offset: 2px; }
+        .checkout { position: sticky; top: 16px; }
+        #cart { padding: 0; list-style: none; }
+        #cart li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .total { display: flex; justify-content: space-between; margin: 18px 0; font-size: 18px; font-weight: bold; }
+        fieldset { margin: 0 0 16px; padding: 12px; border: 1px solid #e1e4dc; border-radius: 8px; }
+        fieldset label { display: block; margin: 9px 0; }
+        .checkout > button { width: 100%; }
+        #message { min-height: 24px; color: #194d36; line-height: 1.5; }
+        @media (max-width: 650px) {
+            .layout { grid-template-columns: 1fr; }
+            .checkout { position: static; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bonito Cafe</h1>
+        <p>Fresh, tasty food made for you</p>
+    </header>
+    <main>
+        <h2>Today's menu</h2>
+        <p id="table"></p>
+        <div class="layout">
+            <section class="menu" aria-label="Food menu">
+                <article class="item"><div><h3>Veg Burger</h3><p>Crispy patty, fresh veggies</p><span class="price">₹50</span></div><button onclick="add('Veg Burger')">Add</button></article>
+                <article class="item"><div><h3>Cheese Pizza</h3><p>Classic cheese, baked fresh</p><span class="price">₹100</span></div><button onclick="add('Cheese Pizza')">Add</button></article>
+                <article class="item"><div><h3>Garden Sandwich</h3><p>Toasted with fresh vegetables</p><span class="price">₹40</span></div><button onclick="add('Garden Sandwich')">Add</button></article>
+            </section>
+            <section class="checkout">
+                <h2>Your order</h2>
+                <ul id="cart"><li>Your cart is empty</li></ul>
+                <div class="total"><span>Total</span><span id="total">₹0</span></div>
+                <fieldset>
+                    <legend>Payment method</legend>
+                    <label><input type="radio" name="payment" value="Cash" checked> Cash at counter</label>
+                    <label><input type="radio" name="payment" value="UPI"> UPI at counter</label>
+                </fieldset>
+                <button onclick="placeOrder()">Place order</button>
+                <p id="message" aria-live="polite"></p>
+            </section>
+        </div>
+    </main>
+    <script>
+        const prices = { "Veg Burger": 50, "Cheese Pizza": 100, "Garden Sandwich": 40 };
+        const cart = {};
+        const table = new URLSearchParams(location.search).get("table") || Math.floor(Math.random() * 20) + 1;
+        document.getElementById("table").textContent = "Table: " + table;
+
+        function add(food) {
+            cart[food] = (cart[food] || 0) + 1;
+            document.getElementById("message").textContent = food + " added to your order.";
+            renderCart();
+        }
+
+        function renderCart() {
+            const list = document.getElementById("cart");
+            list.replaceChildren();
+            let total = 0;
+            Object.entries(cart).forEach(([food, quantity]) => {
+                total += prices[food] * quantity;
+                const item = document.createElement("li");
+                item.textContent = food + " × " + quantity;
+                const cost = document.createElement("span");
+                cost.textContent = "₹" + prices[food] * quantity;
+                item.append(cost);
+                list.append(item);
+            });
+            if (!list.children.length) list.innerHTML = "<li>Your cart is empty</li>";
+            document.getElementById("total").textContent = "₹" + total;
+        }
+
+        function placeOrder() {
+            if (!Object.keys(cart).length) {
+                document.getElementById("message").textContent = "Add an item before placing your order.";
+                return;
+            }
+            const payment = document.querySelector('input[name="payment"]:checked').value;
+            document.getElementById("message").textContent =
+                "Order placed for Table " + (table || "not selected") + ". Pay by " + payment + " at the counter.";
+        }
+    </script>
+</body>
+</html>
